@@ -5,7 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class AgendadorTarefasApplicationTests {
-
+	git push -u origin main
 	@Test
 	void contextLoads() {
 	}
