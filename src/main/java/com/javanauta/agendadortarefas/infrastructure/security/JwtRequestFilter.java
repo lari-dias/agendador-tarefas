@@ -16,7 +16,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
-    public JwtRequestFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
+    public JwtRequestFilter(JwtUtil jwtUtil,
+                            UserDetailsServiceImpl userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
@@ -32,8 +33,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        // 1. Extrai token
         if (header != null && header.startsWith("Bearer ")) {
+
             token = header.substring(7);
 
             try {
@@ -44,28 +45,30 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Autentica usuário no contexto
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userDetailsService.carregaDadosUsuario(username, token);
+            UserDetails userDetails =
+                    userDetailsService.carregaDadosUsuario(username, token);
 
             if (jwtUtil.validateToken(token, userDetails.getUsername())) {
 
-                UsernamePasswordAuthenticationToken auth =
+                UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities()
                         );
 
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+
             } else {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         }
 
-        // 3. Continua fluxo
         filterChain.doFilter(request, response);
     }
 }

@@ -2,25 +2,43 @@ package com.javanauta.agendadortarefas.infrastructure.security;
 
 import com.javanauta.agendadortarefas.business.dto.UsuarioDTO;
 import com.javanauta.agendadortarefas.infrastructure.client.UsuarioClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserDetailsServiceImpl {
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UsuarioClient client;
+    private final UsuarioClient usuarioClient;
 
-    public UserDetails carregaDadosUsuario(String email, String token) {
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        UsuarioDTO usuarioDTO = client.buscaUsuarioPorEmail(email, token);
+        throw new UnsupportedOperationException(
+                "Use o método carregaDadosUsuario(email, token)."
+        );
+    }
 
-        return User
-                .withUsername(usuarioDTO.getEmail())
+    public UserDetails carregaDadosUsuario(
+            String email,
+            String token
+    ) {
+
+        UsuarioDTO usuarioDTO =
+                usuarioClient.buscaUsuarioPorEmail(
+                        email,
+                        "Bearer " + token
+                );
+
+        return User.builder()
+                .username(usuarioDTO.getEmail())
                 .password(usuarioDTO.getSenha())
-                .authorities("USER")
+                .roles("USER")
                 .build();
     }
 }
